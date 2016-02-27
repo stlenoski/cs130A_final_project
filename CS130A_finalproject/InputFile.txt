@@ -1,0 +1,2 @@
+steven,2,student
+mela,3,student
