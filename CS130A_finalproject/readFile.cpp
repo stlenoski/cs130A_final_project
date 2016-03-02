@@ -10,13 +10,16 @@
 #include <string.h>
 #include <iostream>
 #include<fstream>
+#include<forward_list>
 #define CAPACITY 100
+#define TABLE_SIZE 211
 #include "readFile.h"
 
 using namespace std;
 template<class T>
 readFile<T>::readFile()
 {
+	//hashtable = new T[TABLE_SIZE];
 	info = new T*[CAPACITY];
 	count = 0;
 }
@@ -41,15 +44,19 @@ void readFile<T>::read(std::istream& input)
 			index++;
 			count++;
 		}
-		putInDisk();
 
+		putInDisk();
 	}
+
+	//insertfriendGraph();
 }
 template<class T>
 void readFile<T>::print()
 {
 	for(int i = 0; i<CAPACITY;i++)
-		cout<<info[i]->getName()<< " "<<info[i]->getAge()<< " "<<info[i]->getOccupation()<<endl;
+	{	cout<<info[i]->getName()<< " "<<info[i]->getAge()<< " "<<info[i]->getOccupation()<<endl;
+	//cout<<hashtable[i].getName()<< " "<<hashtable[i].getIndex()<<endl;
+	}
 }
 template<class T>
 vector<string> readFile<T>::split(string str, char delimiter)
@@ -60,11 +67,8 @@ vector<string> readFile<T>::split(string str, char delimiter)
 
 	while(getline(ss, tok, delimiter))
 	{
-
 		internal.push_back(tok);
-
 	}
-
 	return internal;
 }
 
@@ -72,23 +76,50 @@ vector<string> readFile<T>::split(string str, char delimiter)
 template<class T>
 void readFile<T>::putInDisk()
 {
-FILE * pFile;
-pFile = fopen ( "ProfileData.txt" , "w" );
-for(int i = 0;i<count;i++)
+	FILE * pFile;
+	pFile = fopen ( "ProfileData.txt" , "w" );
+	for(int i = 0;i<count;i++)
+	{
+		const char* name= info[i]->getName().c_str();
+		const char* age = info[i]->getAge().c_str();
+		const char* occupation = info[i]->getOccupation().c_str();
+		fputs ( name , pFile );
+		fseek ( pFile , 20+53*i , SEEK_SET );
+		fputs ( age , pFile );
+		fseek ( pFile , 3- strlen(age) , SEEK_CUR );
+		fputs( occupation, pFile);
+		fseek ( pFile , 20- strlen(occupation) , SEEK_CUR );
+
+	}
+	 //fclose(pFile);
+
+}
+template<class T>
+int readFile<T>::hash(string str)
 {
-	//char* name =(char*)info[i]->getName();
-	fputs ( info[i]->getName().c_str() , pFile );
-	fseek ( pFile , 20+20*i , SEEK_SET );
-	fputs ( info[i]->getAge().c_str() , pFile );
-	fseek ( pFile , 3- strlen((char*) info[i]->getAge().c_str()) , SEEK_CUR );
-	fputs( info[i]->getOccupation().c_str(), pFile);
+	int hash = 0;
+	for(int i =0; i<str.length();i++)
+	{
+		hash = (hash * 101 +str[i]) % TABLE_SIZE;
+	}
+	return hash;
 }
 
-fseek(pFile,54,SEEK_SET);
-fputs("+",pFile);
-fclose ( pFile );
+template<class T>
+void readFile<T>::insertfriendGraph()
+{
+	for(int i =0;i<CAPACITY;i++)
+	{
+		int index;
+		//index = hash(info[53*i]->getName());
+		//hashtable[index].setName( (info[53*i]->getName()));
+		//hashtable[index].setIndex(i);
+
+	}
 
 }
+
+
 int main()
 {
 	string name;
